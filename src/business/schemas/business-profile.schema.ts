@@ -2,13 +2,14 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { User } from 'src/users/shemas/user.schema';
 
+export type BusinessProfileDocument = Document & BusinessProfile;
 @Schema({ timestamps: true })
 export class BusinessProfile extends Document {
   @Prop({ type: Types.ObjectId, ref: User.name, required: true, unique: true })
-  user: Types.ObjectId;
+  owner: Types.ObjectId;
 
   @Prop({ required: true })
-  businessName: string;
+  name: string;
 
   @Prop()
   description?: string;
@@ -16,11 +17,11 @@ export class BusinessProfile extends Document {
   @Prop({ type: Types.ObjectId, ref: 'Media', default: null })
   logo?: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'Media', default: null })
-  banner?: Types.ObjectId;
+  @Prop({ type: [Types.ObjectId], ref: 'Media', default: null })
+  banners?: Types.ObjectId[];
 
   @Prop()
-  businessAddress?: string;
+  address?: string;
 
   @Prop()
   taxCode?: string;

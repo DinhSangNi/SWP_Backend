@@ -8,6 +8,7 @@ import { MediasModule } from './medias/medias.module';
 import { BusinessModule } from './business/business.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { ProductsModule } from './products/products.module';
+import { CategoryModule } from './category/category.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ProductsModule } from './products/products.module';
     BusinessModule,
     CloudinaryModule,
     ProductsModule,
+    CategoryModule,
   ],
   providers: [AppService],
 })

@@ -2,9 +2,12 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   HttpStatus,
   Param,
+  Patch,
   Post,
+  Query,
   Req,
   Res,
   UseGuards,
@@ -17,11 +20,22 @@ import { CreateProductDto } from './dtos/create-product.dto';
 import { Response } from 'express';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserRole } from 'src/common/enums/user-role.enum';
+import { UpdateProductDto } from './dtos/update-product.dto';
+import { GetProductsQueryDto } from './dtos/get-products-query.dto';
 
 @ApiTags('Product')
+@ApiBearerAuth()
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
+
+  @Get()
+  async getProducts(@Query() query: GetProductsQueryDto, @Res() res: Response) {
+    return res.status(HttpStatus.OK).json({
+      message: 'Get products successfully',
+      metadata: await this.productsService.getProducts(query),
+    });
+  }
 
   @Post()
   @UseGuards(JwtAuthGuard, RoleGuard)
@@ -43,7 +57,29 @@ export class ProductsController {
     });
   }
 
-  @Delete('id')
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Role('business', 'admin')
+  async updateProduct(
+    @Param('id') id: string,
+    @Body() body: UpdateProductDto,
+    @Req() req: { user: { userId: string; role: UserRole } },
+    @Res() res: Response,
+  ) {
+    const { userId, role } = req.user;
+    const product = await this.productsService.updateProduct(
+      id,
+      body,
+      userId,
+      role,
+    );
+    return res.status(HttpStatus.OK).json({
+      message: 'Update product successfully',
+      metadata: product,
+    });
+  }
+
+  @Delete(':id')
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Role('business', 'admin')
   async deleteProduct(

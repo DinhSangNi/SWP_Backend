@@ -22,6 +22,14 @@ export class CreateProductDto {
   @IsNumber()
   quantity: number;
 
+  @IsMongoId()
+  @IsNotEmpty()
+  @ApiProperty({
+    description: 'ID của category',
+    example: '60f1c2a7e3a1234567890abc',
+  })
+  category: string;
+
   @ApiPropertyOptional()
   @IsString()
   @IsOptional()

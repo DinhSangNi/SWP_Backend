@@ -17,6 +17,9 @@ export class Product {
   @Prop({ required: true })
   quantity: number;
 
+  @Prop({ type: Types.ObjectId, ref: 'Category', required: true })
+  category: Types.ObjectId;
+
   @Prop({ type: Types.ObjectId, ref: 'Media', default: null })
   thumbnail: Types.ObjectId;
 

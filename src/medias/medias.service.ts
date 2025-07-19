@@ -63,6 +63,21 @@ export class MediasService {
     return this.mediaModel.find({ _id: { $in: objectIds } });
   }
 
+  async deleteMedia(mediaId: string): Promise<void> {
+    const objectId = new Types.ObjectId(mediaId);
+
+    const media = await this.mediaModel.findById(objectId);
+    if (!media) {
+      throw new NotFoundException('Media not found');
+    }
+
+    if (media.publicId) {
+      await this.cloudinaryService.deleteFile(media.publicId);
+    }
+
+    await this.mediaModel.deleteOne({ _id: objectId });
+  }
+
   async deleteManyMediaByIds(mediaIds: string[]): Promise<void> {
     const medias = await this.mediaModel.find({
       _id: { $in: mediaIds },

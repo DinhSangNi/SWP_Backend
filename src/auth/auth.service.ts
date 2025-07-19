@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
 import { RegisterDto } from './dtos/register.dto';
@@ -64,6 +68,19 @@ export class AuthService {
         username: user.username,
         role: user.role,
       },
+    };
+  }
+
+  async refreshToken(refreshToken: string) {
+    if (!refreshToken) throw new NotFoundException('Refresh token not found');
+
+    const { sub, role } = await this.jwtService.verifyAsync(refreshToken, {
+      secret: this.configService.get<string>('REFRESH_TOKEN_SECRET'),
+    });
+
+    return {
+      accessToken: await this.generateToken({ sub, role }),
+      refreshToken: await this.generateRefreshToken({ sub, role }),
     };
   }
 }

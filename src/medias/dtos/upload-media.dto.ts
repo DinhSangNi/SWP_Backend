@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { MediaType, MediaUsage } from '../types/media.enum';
+import { IsEnum, IsOptional } from 'class-validator';
 
 export class UploadMediaDto {
   @ApiProperty({
@@ -7,6 +8,7 @@ export class UploadMediaDto {
     description: 'Loại media',
     example: MediaType.IMAGE,
   })
+  @IsEnum(MediaType)
   fileType: MediaType;
 
   @ApiProperty({
@@ -15,5 +17,7 @@ export class UploadMediaDto {
     required: false,
     example: MediaUsage.PRODUCT_GALLERY,
   })
+  @IsOptional()
+  @IsEnum(MediaUsage)
   usage?: MediaUsage;
 }
