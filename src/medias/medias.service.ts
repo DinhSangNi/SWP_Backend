@@ -41,7 +41,6 @@ export class MediasService {
     target: MediaTarget,
     targetId: Types.ObjectId,
   ): Promise<MediaDocument[]> {
-    console.log('mediaIds: ', mediaIds);
     const objectIds = mediaIds.map((id) => new Types.ObjectId(id));
 
     const result = await this.mediaModel.updateMany(
@@ -162,5 +161,13 @@ export class MediasService {
     const mediaIds = medias.map((media) => media._id);
 
     await this.mediaModel.deleteMany({ _id: { $in: mediaIds } });
+  }
+
+  async getAllTemporarayMedia(): Promise<MediaDocument[]> {
+    return (
+      (await this.mediaModel.find({
+        isTemporary: true,
+      })) ?? []
+    );
   }
 }
