@@ -72,7 +72,10 @@ export class MediasService {
     }
 
     if (media.publicId) {
-      await this.cloudinaryService.deleteFile(media.publicId);
+      await this.cloudinaryService.deleteFile(
+        media.publicId,
+        media.type as 'image' | 'video' | 'raw',
+      );
     }
 
     await this.mediaModel.deleteOne({ _id: objectId });
@@ -83,9 +86,16 @@ export class MediasService {
       _id: { $in: mediaIds },
     });
 
+    if (medias.length === 0) {
+      throw new NotFoundException('Media not found');
+    }
+
     const deletePromises = medias.map((media) => {
       if (media.publicId) {
-        return this.cloudinaryService.deleteFile(media.publicId);
+        return this.cloudinaryService.deleteFile(
+          media.publicId,
+          media.type as 'image' | 'video' | 'raw',
+        );
       }
     });
 
@@ -99,6 +109,56 @@ export class MediasService {
         console.log(`✅ Deleted file: ${publicId}`);
       }
     });
+
+    await this.mediaModel.deleteMany({ _id: { $in: mediaIds } });
+  }
+
+  async deleteMediaByPublicId(publicId: string): Promise<void> {
+    const media = await this.mediaModel.findOne({
+      publicId: publicId,
+    });
+
+    if (!media) {
+      throw new NotFoundException('Media not found');
+    }
+
+    await this.cloudinaryService.deleteFile(
+      publicId,
+      media.type as 'image' | 'video' | 'raw',
+    );
+    await this.mediaModel.deleteOne({ _id: media._id });
+  }
+
+  async deleteMediasByPublicIds(publicIds: string[]) {
+    const medias = await this.mediaModel.find({
+      publicId: { $in: publicIds },
+    });
+
+    if (medias.length === 0) {
+      throw new NotFoundException('Media not found');
+    }
+
+    const deletePromises = medias.map((media) => {
+      if (media.publicId) {
+        return this.cloudinaryService.deleteFile(
+          media.publicId,
+          media.type as 'image' | 'video' | 'raw',
+        );
+      }
+    });
+
+    const results = await Promise.allSettled(deletePromises);
+
+    results.forEach((result, index) => {
+      const publicId = medias[index]?.publicId;
+      if (result.status === 'rejected') {
+        console.error(`❌ Failed to delete file: ${publicId}`, result.reason);
+      } else {
+        console.log(`✅ Deleted file: ${publicId}`);
+      }
+    });
+
+    const mediaIds = medias.map((media) => media._id);
 
     await this.mediaModel.deleteMany({ _id: { $in: mediaIds } });
   }

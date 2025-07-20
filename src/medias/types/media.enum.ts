@@ -2,6 +2,7 @@ export enum MediaTarget {
   USER = 'User',
   PRODUCT = 'Product',
   BUSINESS = 'BusinessProfile',
+  POST = 'Post',
 }
 
 export enum MediaUsage {

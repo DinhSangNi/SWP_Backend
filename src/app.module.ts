@@ -9,6 +9,7 @@ import { BusinessModule } from './business/business.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { ProductsModule } from './products/products.module';
 import { CategoryModule } from './category/category.module';
+import { PostModule } from './post/post.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { CategoryModule } from './category/category.module';
     CloudinaryModule,
     ProductsModule,
     CategoryModule,
+    PostModule,
   ],
   providers: [AppService],
 })

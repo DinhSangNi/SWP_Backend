@@ -31,9 +31,14 @@ export class CloudinaryService {
     }
   }
 
-  async deleteFile(publicId: string): Promise<void> {
+  async deleteFile(
+    publicId: string,
+    resourceType: 'image' | 'video' | 'raw' = 'image',
+  ): Promise<void> {
     try {
-      return await cloudinary.uploader.destroy(publicId);
+      return await cloudinary.uploader.destroy(publicId, {
+        resource_type: resourceType,
+      });
     } catch (error) {
       throw new Error('Cloudinary delete error: ' + error.message);
     }
