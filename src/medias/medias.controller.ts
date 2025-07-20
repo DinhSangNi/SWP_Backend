@@ -25,6 +25,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RoleGuard } from 'src/common/guards/role.guard';
 import { Role } from 'src/common/decorators/role.decorator';
 import { Response } from 'express';
+import { MediaType, MediaUsage } from './types/media.enum';
 
 @ApiTags('Medias')
 @ApiBearerAuth()
@@ -39,7 +40,26 @@ export class MediasController {
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: 'Upload media',
-    type: UploadMediaDto,
+    required: true,
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+        fileType: {
+          type: 'string',
+          enum: Object.values(MediaType),
+          example: MediaType.IMAGE,
+        },
+        usage: {
+          type: 'string',
+          enum: Object.values(MediaUsage),
+          example: MediaUsage.PRODUCT_GALLERY,
+        },
+      },
+    },
   })
   async upload(
     @UploadedFile() file: Express.Multer.File,

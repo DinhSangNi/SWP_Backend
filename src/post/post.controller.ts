@@ -26,7 +26,7 @@ import { UserRole } from 'src/common/enums/user-role.enum';
 import { GetPostsQueryDto } from './dtos/get-post-query.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { fileValidatorPipe } from 'src/gemini/file-validator.pipe';
-import { CreatePostIntroduceProductDto } from './dtos/create-post-introduce-product-by-ai.dto';
+import { CreatePostIntroduceProductByAIDto } from './dtos/create-post-introduce-product-by-ai.dto';
 
 @ApiTags('Posts')
 @ApiBearerAuth()
@@ -67,6 +67,10 @@ export class PostController {
   }
 
   @Post('introduct-product-by-ai')
+  @ApiBody({
+    description: 'Create post introduct product by AI',
+    type: CreatePostIntroduceProductByAIDto,
+  })
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Role('business', 'admin')
   @UseInterceptors(FilesInterceptor('files'))
@@ -78,7 +82,7 @@ export class PostController {
       };
     },
     @UploadedFiles(fileValidatorPipe) files: Express.Multer.File[],
-    @Body() dto: CreatePostIntroduceProductDto,
+    @Body() dto: CreatePostIntroduceProductByAIDto,
     @Res() res: Response,
   ) {
     const { userId } = req.user;

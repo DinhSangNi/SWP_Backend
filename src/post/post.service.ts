@@ -17,7 +17,7 @@ import { GetPostsQueryDto } from './dtos/get-post-query.dto';
 import { PaginationResponse } from 'src/common/dtos/pagination-response.dto';
 import { JSDOM } from 'jsdom';
 import { extractPublicId } from 'src/common/utils/cloudinaryUtil';
-import { CreatePostIntroduceProductDto } from './dtos/create-post-introduce-product-by-ai.dto';
+import { CreatePostIntroduceProductByAIDto } from './dtos/create-post-introduce-product-by-ai.dto';
 import { GeminiService } from 'src/gemini/gemini.service';
 import { BusinessService } from 'src/business/business.service';
 
@@ -107,7 +107,7 @@ export class PostService {
 
   async createPostIntroduceProductByAI(
     authorId: string,
-    dto: CreatePostIntroduceProductDto,
+    dto: CreatePostIntroduceProductByAIDto,
     files: Express.Multer.File[],
   ): Promise<{ text: string }> {
     const medias = await Promise.all(
