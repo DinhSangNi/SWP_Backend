@@ -44,9 +44,12 @@ export class MediasController {
     schema: {
       type: 'object',
       properties: {
-        file: {
-          type: 'string',
-          format: 'binary',
+        images: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary',
+          },
         },
         fileType: {
           type: 'string',

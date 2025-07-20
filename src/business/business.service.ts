@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -12,6 +13,7 @@ import { Model, Types } from 'mongoose';
 import { CreateBusinessProfileDto } from './dtos/create-business-profile.dto';
 import { MediasService } from 'src/medias/medias.service';
 import { MediaTarget } from 'src/medias/types/media.enum';
+import { BusinessProfileStatus } from './types/business-profile.enum';
 
 @Injectable()
 export class BusinessService {
@@ -66,5 +68,23 @@ export class BusinessService {
       throw new NotFoundException('Business profile not found');
 
     return businessProfile;
+  }
+
+  async verifyBusinessProfile(id: string): Promise<BusinessProfileDocument> {
+    const businessProfile = await this.businessProfileModel.findOne({
+      _id: new Types.ObjectId(id),
+    });
+
+    if (!businessProfile) {
+      throw new NotFoundException('Business profile not found');
+    }
+
+    if (businessProfile.verifiedAt) {
+      throw new BadRequestException('Business profile already verified');
+    }
+
+    businessProfile.verifiedAt = new Date();
+    businessProfile.status = BusinessProfileStatus.ACTIVE;
+    return await businessProfile.save();
   }
 }

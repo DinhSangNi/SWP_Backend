@@ -1,8 +1,11 @@
 import {
   Body,
   Controller,
+  Get,
   HttpStatus,
+  Param,
   Post,
+  Query,
   Req,
   Res,
   UseGuards,
@@ -13,6 +16,8 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateBusinessProfileDto } from 'src/business/dtos/create-business-profile.dto';
 import { Response } from 'express';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Role } from 'src/common/decorators/role.decorator';
+import { GetUsersQueryDto } from './dtos/get-users-query.dto';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -20,9 +25,21 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
 
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Lấy toàn bộ user (có thể filter theo query)' })
+  async getUsers(@Query() query: GetUsersQueryDto, @Res() res: Response) {
+    const user = await this.userService.getUsers(query);
+
+    return res.status(HttpStatus.OK).json({
+      message: 'Get users successfully',
+      metadata: user,
+    });
+  }
+
   @Post('become-business')
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Convert customer to business' })
+  @ApiOperation({ summary: 'Chuyển customer sang business' })
   async becomeBusiness(
     @Req()
     req: {
@@ -38,6 +55,22 @@ export class UsersController {
     return res.status(HttpStatus.OK).json({
       message: 'Converted to business successfully',
       metadata: result,
+    });
+  }
+
+  @Post(':userId/verify-business')
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Role('admin')
+  @ApiOperation({ summary: 'Verify business profile của user' })
+  async verifyBusinessProfile(
+    @Param('userId') userId: string,
+    @Res() res: Response,
+  ) {
+    const user = await this.userService.verifyUserToBusiness(userId);
+
+    return res.status(HttpStatus.OK).json({
+      message: 'Business profile verified successfully',
+      metadata: user,
     });
   }
 }

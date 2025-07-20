@@ -20,6 +20,7 @@ import { extractPublicId } from 'src/common/utils/cloudinaryUtil';
 import { CreatePostIntroduceProductByAIDto } from './dtos/create-post-introduce-product-by-ai.dto';
 import { GeminiService } from 'src/gemini/gemini.service';
 import { BusinessService } from 'src/business/business.service';
+import { CreatePostIntroduceBusinessByAIDto } from './dtos/create-post-introduce-business-by-AI.dto';
 
 @Injectable()
 export class PostService {
@@ -152,6 +153,54 @@ export class PostService {
       ${businessProfile.address && `- address: ${businessProfile.address}`}
       ${businessProfile.phone && `- Name: ${businessProfile.phone}`}`
     }
+    `;
+
+    return await this.geminiService.generateTextFromMultiModal(prompt, files);
+  }
+
+  async createPostIntroduceBusinessByAI(
+    authorId: string,
+    dto: CreatePostIntroduceBusinessByAIDto,
+    files: Express.Multer.File[],
+  ): Promise<{ text: string }> {
+    const medias = await Promise.all(
+      files.map((file) =>
+        this.mediaService.upload(file, MediaType.IMAGE, authorId),
+      ),
+    );
+
+    if (medias.length === 0)
+      throw new InternalServerErrorException('Can not create media');
+
+    const imagesText = medias
+      .map((media, idx) => `Ảnh ${idx + 1}: ${media.url}`)
+      .join('\n');
+
+    const businessProfile =
+      await this.businessService.getBussinessProfileByOwnerId(authorId);
+
+    const prompt = `
+    You are a marketing expert. Please write a professional post in Markdown format to introduce a product.
+    
+    ${
+      businessProfile &&
+      `
+      Business details: 
+      ${businessProfile.name && `- Name: ${businessProfile.name}`}
+      ${businessProfile.address && `- address: ${businessProfile.address}`}
+      ${businessProfile.phone && `- Name: ${businessProfile.phone}`}`
+    }
+    
+    Mapping images: 
+      ${imagesText}
+
+    Requirements:
+      - Length: Around 300 to 400 words.
+      - Professional and persuasive tone suitable for a business website.
+      - Incorporate relevant image descriptions where appropriate.
+      - End the article with a strong call-to-action to encourage visitors to learn more or make a purchase.
+
+    
     `;
 
     return await this.geminiService.generateTextFromMultiModal(prompt, files);

@@ -68,8 +68,42 @@ export class PostController {
 
   @Post('introduct-product-by-ai')
   @ApiBody({
-    description: 'Create post introduct product by AI',
-    type: CreatePostIntroduceProductByAIDto,
+    description: 'Upload media',
+    required: true,
+    schema: {
+      type: 'object',
+      properties: {
+        images: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+        name: {
+          type: 'string',
+          description: 'Tên sản phẩm',
+        },
+        shortDescription: {
+          type: 'string',
+          description: 'Mô tả ngắn về sản phẩm',
+        },
+        price: {
+          type: 'number',
+          description: 'Giá gốc sản phẩm',
+        },
+        salePrice: {
+          type: 'number',
+          description: 'Giá khuyến mãi',
+        },
+        mainFeatures: {
+          type: 'string',
+          description: 'các tính năng chính',
+          example:
+            'Automatically vacuums and mops in a single run Easily controlled via smartphone app; compatible with Google Assistant & Alexa',
+        },
+      },
+    },
   })
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Role('business', 'admin')
