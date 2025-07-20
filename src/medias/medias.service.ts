@@ -41,6 +41,7 @@ export class MediasService {
     target: MediaTarget,
     targetId: Types.ObjectId,
   ): Promise<MediaDocument[]> {
+    console.log('mediaIds: ', mediaIds);
     const objectIds = mediaIds.map((id) => new Types.ObjectId(id));
 
     const result = await this.mediaModel.updateMany(

@@ -21,7 +21,7 @@ export class UsersController {
   constructor(private readonly userService: UsersService) {}
 
   @Post('become-business')
-  @UseGuards(JwtAuthGuard, RoleGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Convert customer to business' })
   async becomeBusiness(
     @Req()

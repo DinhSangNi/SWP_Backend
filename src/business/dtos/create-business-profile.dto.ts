@@ -1,5 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsOptional, IsMongoId } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsMongoId,
+  IsArray,
+} from 'class-validator';
 
 export class CreateBusinessProfileDto {
   @ApiProperty({ example: 'Cửa hàng ABC' })
@@ -18,9 +24,12 @@ export class CreateBusinessProfileDto {
   logo?: string;
 
   @ApiPropertyOptional()
-  @IsMongoId()
+  @IsArray()
+  @IsMongoId({
+    each: true,
+  })
   @IsOptional()
-  banners?: string;
+  banners?: string[];
 
   @ApiPropertyOptional({ example: '123 Nguyễn Trãi, TP.HCM' })
   @IsString()
