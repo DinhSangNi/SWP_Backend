@@ -60,6 +60,20 @@ export class AuthController {
     });
   }
 
+  @Post('/logout')
+  @ApiOperation({ summary: 'Đăng xuất' })
+  async logout(@Res() res: Response) {
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'strict',
+    });
+
+    return res.status(HttpStatus.OK).json({
+      message: 'Logout successfully',
+    });
+  }
+
   @Post('refresh')
   @UseGuards(JwtAuthGuard)
   @ApiCookieAuth()
