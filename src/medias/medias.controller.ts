@@ -35,7 +35,7 @@ export class MediasController {
 
   @Post('upload')
   @UseGuards(JwtAuthGuard, RoleGuard)
-  @Role('business')
+  // @Role('business')
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
