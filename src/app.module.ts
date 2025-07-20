@@ -10,6 +10,7 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { ProductsModule } from './products/products.module';
 import { CategoryModule } from './category/category.module';
 import { PostModule } from './post/post.module';
+import { GeminiModule } from './gemini/gemini.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { PostModule } from './post/post.module';
     ProductsModule,
     CategoryModule,
     PostModule,
+    GeminiModule,
   ],
   providers: [AppService],
 })

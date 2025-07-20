@@ -11,3 +11,8 @@ export enum PostSortBy {
   PUBLISHED_AT = 'publishedAt',
   VIEWS = 'views',
 }
+
+export enum PostTarget {
+  PRODUCT = 'product',
+  SERVICE = 'service',
+}

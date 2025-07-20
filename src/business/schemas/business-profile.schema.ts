@@ -20,10 +20,13 @@ export class BusinessProfile extends Document {
   @Prop({ type: [Types.ObjectId], ref: 'Media', default: null })
   banners?: Types.ObjectId[];
 
-  @Prop()
+  @Prop({ default: null })
   address?: string;
 
-  @Prop()
+  @Prop({ min: 10, max: 10 })
+  phone: string;
+
+  @Prop({ default: null })
   taxCode?: string;
 
   @Prop({ default: false })

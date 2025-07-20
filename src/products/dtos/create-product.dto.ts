@@ -18,6 +18,11 @@ export class CreateProductDto {
   @IsNumber()
   price: number;
 
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  salePrice?: number;
+
   @ApiProperty()
   @IsNumber()
   quantity: number;

@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   BusinessProfile,
@@ -49,5 +53,18 @@ export class BusinessService {
     }
 
     return business;
+  }
+
+  async getBussinessProfileByOwnerId(
+    ownerId: string,
+  ): Promise<BusinessProfileDocument> {
+    const businessProfile = await this.businessProfileModel.findOne({
+      owner: new Types.ObjectId(ownerId),
+    });
+
+    if (!businessProfile)
+      throw new NotFoundException('Business profile not found');
+
+    return businessProfile;
   }
 }

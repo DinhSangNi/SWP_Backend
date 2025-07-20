@@ -10,7 +10,9 @@ import {
   Query,
   Req,
   Res,
+  UploadedFiles,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
@@ -22,6 +24,9 @@ import { CreatePostDto } from './dtos/create-post.dto';
 import { UpdatePostDto } from './dtos/update-post.dto';
 import { UserRole } from 'src/common/enums/user-role.enum';
 import { GetPostsQueryDto } from './dtos/get-post-query.dto';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { fileValidatorPipe } from 'src/gemini/file-validator.pipe';
+import { CreatePostIntroduceProductDto } from './dtos/create-post-introduce-product-by-ai.dto';
 
 @ApiTags('Posts')
 @ApiBearerAuth()
@@ -58,6 +63,32 @@ export class PostController {
     return res.status(HttpStatus.CREATED).json({
       message: 'Create post successfully',
       metadata: (await this.postService.createPost(body, userId)).toObject(),
+    });
+  }
+
+  @Post('introduct-product-by-ai')
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Role('business', 'admin')
+  @UseInterceptors(FilesInterceptor('files'))
+  async createPostIntroductProductByAI(
+    @Req()
+    req: {
+      user: {
+        userId: string;
+      };
+    },
+    @UploadedFiles(fileValidatorPipe) files: Express.Multer.File[],
+    @Body() dto: CreatePostIntroduceProductDto,
+    @Res() res: Response,
+  ) {
+    const { userId } = req.user;
+    return res.status(HttpStatus.OK).json({
+      message: 'Create post by AI successfully',
+      metadata: await this.postService.createPostIntroduceProductByAI(
+        userId,
+        dto,
+        files,
+      ),
     });
   }
 

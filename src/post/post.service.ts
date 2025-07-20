@@ -1,6 +1,7 @@
 import {
   ForbiddenException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -9,19 +10,24 @@ import { Model, Types } from 'mongoose';
 import { CreatePostDto } from './dtos/create-post.dto';
 import { PostSortBy, PostStatus } from './types/post.enum';
 import { MediasService } from 'src/medias/medias.service';
-import { MediaTarget } from 'src/medias/types/media.enum';
+import { MediaTarget, MediaType } from 'src/medias/types/media.enum';
 import { UpdatePostDto } from './dtos/update-post.dto';
 import { UserRole } from 'src/common/enums/user-role.enum';
 import { GetPostsQueryDto } from './dtos/get-post-query.dto';
 import { PaginationResponse } from 'src/common/dtos/pagination-response.dto';
 import { JSDOM } from 'jsdom';
 import { extractPublicId } from 'src/common/utils/cloudinaryUtil';
+import { CreatePostIntroduceProductDto } from './dtos/create-post-introduce-product-by-ai.dto';
+import { GeminiService } from 'src/gemini/gemini.service';
+import { BusinessService } from 'src/business/business.service';
 
 @Injectable()
 export class PostService {
   constructor(
     @InjectModel(Post.name) private readonly postModel: Model<PostDocument>,
     private readonly mediaService: MediasService,
+    private readonly geminiService: GeminiService,
+    private readonly businessService: BusinessService,
   ) {}
 
   async getPosts(
@@ -97,6 +103,58 @@ export class PostService {
     }
 
     return post;
+  }
+
+  async createPostIntroduceProductByAI(
+    authorId: string,
+    dto: CreatePostIntroduceProductDto,
+    files: Express.Multer.File[],
+  ): Promise<{ text: string }> {
+    const medias = await Promise.all(
+      files.map((file) =>
+        this.mediaService.upload(file, MediaType.IMAGE, authorId),
+      ),
+    );
+
+    if (medias.length === 0)
+      throw new InternalServerErrorException('Can not create media');
+
+    const imagesText = medias
+      .map((media, idx) => `Ảnh ${idx + 1}: ${media.url}`)
+      .join('\n');
+
+    const businessProfile =
+      await this.businessService.getBussinessProfileByOwnerId(authorId);
+
+    const prompt = `
+    You are a marketing expert. Please write a professional post in Markdown format to introduce a product.
+    Product details: 
+      ${dto.name && `- Name: ${dto.name}`}
+      ${dto.shortDescription && `- Short description: ${dto.shortDescription}`}
+      ${dto.mainFeatures && `- Main benefits: ${dto.mainFeatures}`}
+      ${dto.price && `- Price: ${dto.price}`}
+      ${dto.salePrice && `- Sale Price: ${dto.salePrice}`}
+    
+    Mapping images: 
+      ${imagesText}
+
+    Requirements:
+      - Length: Around 300 to 400 words.
+      - Professional and persuasive tone suitable for a business website.
+      - Incorporate relevant image descriptions where appropriate.
+      - End the article with a strong call-to-action to encourage visitors to learn more or make a purchase.
+
+    ${
+      businessProfile &&
+      `
+      Business details: 
+      ${businessProfile.name && `- Name: ${businessProfile.name}`}
+      ${businessProfile.address && `- address: ${businessProfile.address}`}
+      ${businessProfile.phone && `- Name: ${businessProfile.phone}`}`
+    }
+    `;
+
+    return await this.geminiService.generateTextFromMultiModal(prompt, files);
   }
 
   async updatePost(
