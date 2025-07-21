@@ -15,6 +15,7 @@ import { MediasService } from 'src/medias/medias.service';
 import { UpdateProductDto } from './dtos/update-product.dto';
 import { GetProductsQueryDto } from './dtos/get-products-query.dto';
 import { PaginationResponse } from 'src/common/dtos/pagination-response.dto';
+import path from 'path';
 
 @Injectable()
 export class ProductsService {
@@ -74,6 +75,28 @@ export class ProductsService {
       limit,
       totalPages: Math.ceil(total / limit),
     };
+  }
+
+  async getProductById(productId: string) {
+    const product = await this.productModel.findById(productId).populate([
+      { path: 'category', select: 'name' },
+      { path: 'thumbnail', select: 'url publicId' },
+      { path: 'images', select: 'url publicId' },
+      {
+        path: 'owner',
+        select: 'email name',
+        populate: [
+          {
+            path: 'avatar',
+            select: 'url publicId',
+          },
+        ],
+      },
+    ]);
+
+    if (!product) throw new NotFoundException('Product not found');
+
+    return product;
   }
 
   async createProduct(

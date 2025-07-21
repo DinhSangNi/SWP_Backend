@@ -37,6 +37,14 @@ export class ProductsController {
     });
   }
 
+  @Get(':id')
+  async getProductById(@Param('id') productId: string, @Res() res: Response) {
+    return res.status(HttpStatus.OK).json({
+      message: `Get product by ${productId} successfully`,
+      metadata: await this.productsService.getProductById(productId),
+    });
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Role('business', 'admin')
