@@ -8,14 +8,12 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Product, ProductDocument } from './schemas/product.schema';
 import { Model, Types } from 'mongoose';
 import { CreateProductDto } from './dtos/create-product.dto';
-import { Media, MediaDocument } from 'src/medias/schemas/media.schema';
 import { MediaTarget } from 'src/medias/types/media.enum';
 import { UserRole } from 'src/common/enums/user-role.enum';
 import { MediasService } from 'src/medias/medias.service';
 import { UpdateProductDto } from './dtos/update-product.dto';
 import { GetProductsQueryDto } from './dtos/get-products-query.dto';
 import { PaginationResponse } from 'src/common/dtos/pagination-response.dto';
-import path from 'path';
 
 @Injectable()
 export class ProductsService {
