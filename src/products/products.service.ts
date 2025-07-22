@@ -34,12 +34,17 @@ export class ProductsService {
       maxPrice,
       sortBy = 'createdAt',
       sortOrder = 'desc',
+      owner,
     } = query;
 
     const filter: Record<string, any> = {};
 
     if (keyword) {
       filter.name = { $regex: keyword, $options: 'i' };
+    }
+
+    if (owner) {
+      filter.owner = new Types.ObjectId(owner);
     }
 
     if (minPrice !== undefined || maxPrice !== undefined) {
@@ -62,7 +67,21 @@ export class ProductsService {
         .sort(sort)
         .skip((page - 1) * limit)
         .limit(limit)
-        .populate('thumbnail images owner'),
+        .populate([
+          { path: 'category', select: 'name' },
+          { path: 'thumbnail', select: 'url publicId' },
+          { path: 'images', select: 'url publicId' },
+          {
+            path: 'owner',
+            select: 'email name',
+            populate: [
+              {
+                path: 'avatar',
+                select: 'url publicId',
+              },
+            ],
+          },
+        ]),
       this.productModel.countDocuments(filter),
     ]);
 

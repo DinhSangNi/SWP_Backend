@@ -4,6 +4,7 @@ import {
   Get,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Query,
   Req,
@@ -65,10 +66,29 @@ export class OrderController {
     @Res() res: Response,
   ) {
     const { userId } = req.user;
+    const paginationData = await this.orderService.getMyOrders(userId, query);
 
     return res.status(HttpStatus.OK).json({
       message: `Get my order successfully`,
-      metadata: await this.orderService.getMyOrders(userId, query),
+      metadata: {
+        ...paginationData,
+        items: paginationData.items.map((item) => item.toObject()),
+      },
+    });
+  }
+
+  @Patch(':id/cancel')
+  @UseGuards(JwtAuthGuard)
+  async cancelOrder(
+    @Req() req: { user: { userId: string; role: UserRole } },
+    @Param('id') orderId: string,
+    @Res() res: Response,
+  ) {
+    const { userId } = req.user;
+
+    return res.status(HttpStatus.OK).json({
+      message: `Cancel order with id: ${orderId} successfully`,
+      metadata: await this.orderService.cancelOrder(orderId, userId),
     });
   }
 }

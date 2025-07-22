@@ -8,3 +8,7 @@ export enum BusinessProfileReviewStatus {
   Approved = 'approved',
   Rejected = 'rejected',
 }
+
+export enum BusinessProfileSortBy {
+  NAME = 'name',
+}

@@ -14,6 +14,7 @@ import { GeminiModule } from './gemini/gemini.module';
 import { OrderModule } from './order/order.module';
 import { BusinessProfileLogModule } from './business-profile-log/business-profile-log.module';
 import { AdminModule } from './admin/admin.module';
+import { CartModule } from './cart/cart.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { AdminModule } from './admin/admin.module';
     OrderModule,
     BusinessProfileLogModule,
     AdminModule,
+    CartModule,
   ],
   providers: [AppService],
 })

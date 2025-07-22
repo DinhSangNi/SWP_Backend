@@ -61,5 +61,5 @@ export class GetProductsQueryDto {
   @ApiPropertyOptional({ description: 'Lọc theo userId của người đăng' })
   @IsOptional()
   @IsMongoId()
-  ownerId?: string;
+  owner?: string;
 }

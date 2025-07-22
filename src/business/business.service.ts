@@ -19,6 +19,9 @@ import {
 } from './types/business-profile.enum';
 import { UsersService } from 'src/users/users.service';
 import { UserRole } from 'src/common/enums/user-role.enum';
+import { GetBusinessProfilesQueryDto } from './dtos/get-business-profiles-query.dto';
+import { SortOrder } from 'src/common/enums/sort-order.enum';
+import { PaginationResponse } from 'src/common/dtos/pagination-response.dto';
 
 @Injectable()
 export class BusinessService {
@@ -35,7 +38,7 @@ export class BusinessService {
     });
 
     if (existed) {
-      throw new ForbiddenException('The business already exists');
+      throw new BadRequestException('The business already exists');
     }
 
     const business = await this.businessProfileModel.create({
@@ -85,6 +88,16 @@ export class BusinessService {
     return businessProfile;
   }
 
+  async getBussinessProfieById(id: string): Promise<BusinessProfileDocument> {
+    const businessProfile = await this.businessProfileModel
+      .findById(id)
+      .populate('owner', '_id name email');
+    if (!businessProfile)
+      throw new NotFoundException('Business profile not found');
+
+    return businessProfile;
+  }
+
   async getBussinessProfileByOwnerId(
     ownerId: string,
   ): Promise<BusinessProfileDocument> {
@@ -96,6 +109,54 @@ export class BusinessService {
       throw new NotFoundException('Business profile not found');
 
     return businessProfile;
+  }
+
+  async getBussinessProfiles(
+    query: GetBusinessProfilesQueryDto,
+  ): Promise<PaginationResponse<BusinessProfileDocument>> {
+    const {
+      keyword,
+      taxCode,
+      phone,
+      owner,
+      status,
+      reviewStatus,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+      page = 1,
+      limit = 10,
+    } = query;
+
+    const filter: Record<string, any> = {};
+    if (keyword) filter.name = { $regex: keyword, $options: 'i' };
+    if (taxCode) filter.taxCode = { $regex: taxCode, $options: 'i' };
+    if (phone) filter.phone = phone;
+    if (owner) filter.owner = owner;
+    if (status) filter.status = status;
+    if (reviewStatus) filter.reviewStatus = reviewStatus;
+
+    const sortOption: any = { [sortBy]: sortOrder === SortOrder.ASC ? 1 : -1 };
+
+    const [businessProfiles, total] = await Promise.all([
+      this.businessProfileModel
+        .find(filter)
+        .sort(sortOption)
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .populate('owner', '_id name email')
+        .exec(),
+      this.businessProfileModel.countDocuments(filter),
+    ]);
+
+    return {
+      items: businessProfiles.map((businessProfile) =>
+        businessProfile.toObject(),
+      ),
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async updateBusinessProfileReviewStatus(

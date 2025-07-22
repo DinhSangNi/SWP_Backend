@@ -29,6 +29,9 @@ export class Product {
   @Prop({ type: [Types.ObjectId], ref: 'Media', default: [] })
   images: Types.ObjectId[];
 
+  @Prop({ default: true })
+  isPublish: boolean;
+
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   owner: Types.ObjectId;
 }

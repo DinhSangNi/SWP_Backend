@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpStatus,
   Param,
   Patch,
@@ -9,10 +10,17 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Response } from 'express';
+import { map } from 'rxjs';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { BusinessService } from 'src/business/business.service';
+import { GetBusinessProfilesQueryDto } from 'src/business/dtos/get-business-profiles-query.dto';
 import { UpdateBusinessProfileReviewStatusDto } from 'src/business/dtos/update-business-profile-review-status.dto';
 import { Role } from 'src/common/decorators/role.decorator';
 import { RoleGuard } from 'src/common/guards/role.guard';
@@ -22,6 +30,23 @@ import { RoleGuard } from 'src/common/guards/role.guard';
 @Controller('admin/business-profile')
 export class BusinessController {
   constructor(private readonly businessService: BusinessService) {}
+
+  @Get()
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Role('admin')
+  @ApiOperation({
+    summary: 'Lấy tất cả các business profile theo query param',
+  })
+  @ApiQuery({ type: GetBusinessProfilesQueryDto })
+  async getBussinessProfiles(
+    @Query() query: GetBusinessProfilesQueryDto,
+    @Res() res: Response,
+  ) {
+    return res.status(HttpStatus.OK).json({
+      message: 'Get business profile successfully',
+      metadata: await this.businessService.getBussinessProfiles(query),
+    });
+  }
 
   @Patch(':id/update-review-status')
   @UseGuards(JwtAuthGuard, RoleGuard)
