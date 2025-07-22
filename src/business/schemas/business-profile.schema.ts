@@ -14,7 +14,7 @@ export class BusinessProfile extends Document {
   @Prop({ required: true })
   name: string;
 
-  @Prop()
+  @Prop({ default: null })
   description?: string;
 
   @Prop({ type: Types.ObjectId, ref: 'Media', default: null })

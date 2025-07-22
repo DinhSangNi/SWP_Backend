@@ -143,7 +143,20 @@ export class BusinessService {
         .sort(sortOption)
         .skip((page - 1) * limit)
         .limit(limit)
-        .populate('owner', '_id name email')
+        .populate([
+          {
+            path: 'owner',
+            select: '_id username email fullname',
+          },
+          {
+            path: 'logo',
+            select: 'url',
+          },
+          {
+            path: 'banners',
+            select: 'url',
+          },
+        ])
         .exec(),
       this.businessProfileModel.countDocuments(filter),
     ]);
