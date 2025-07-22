@@ -72,7 +72,7 @@ export class CartService {
     type NormalizedCartItem = Omit<CartItemDto, 'product'> & {
       product: Types.ObjectId;
     };
-    existing.items = mergeCartItems(existing.items, items).map(
+    existing.items = mergeCartItems(existing.items, items!).map(
       (item: NormalizedCartItem) => {
         return {
           ...item,

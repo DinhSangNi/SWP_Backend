@@ -22,6 +22,8 @@ import { UserRole } from 'src/common/enums/user-role.enum';
 import { GetBusinessProfilesQueryDto } from './dtos/get-business-profiles-query.dto';
 import { SortOrder } from 'src/common/enums/sort-order.enum';
 import { PaginationResponse } from 'src/common/dtos/pagination-response.dto';
+import { UpdateBusinessProfileReviewStatusDto } from './dtos/update-business-profile-review-status.dto';
+import { UpdateBusinessProfileDto } from './dtos/update-business-profile.dto';
 
 @Injectable()
 export class BusinessService {
@@ -194,5 +196,42 @@ export class BusinessService {
 
     businessProfile.reviewStatus = reviewStatus;
     return await businessProfile.save();
+  }
+
+  async updateBusinessProfile(
+    id: string,
+    updateDto: UpdateBusinessProfileDto,
+    userId: string,
+    role: UserRole,
+  ): Promise<BusinessProfileDocument> {
+    const businessProfile = await this.businessProfileModel.findById(id);
+    if (!businessProfile)
+      throw new NotFoundException('Business profile not found');
+    if (
+      businessProfile.owner.toString() !== userId &&
+      role !== UserRole.ADMIN
+    ) {
+      throw new ForbiddenException("You don't have permission");
+    }
+
+    const updated = await this.businessProfileModel
+      .findByIdAndUpdate(
+        id,
+        {
+          ...updateDto,
+          logo: new Types.ObjectId(updateDto.logo),
+          banners: updateDto.banners?.map(
+            (banner) => new Types.ObjectId(banner),
+          ),
+        },
+        { new: true },
+      )
+      .exec();
+
+    if (!updated) {
+      throw new NotFoundException(`Business profile with id ${id} not found`);
+    }
+
+    return updated;
   }
 }
