@@ -27,7 +27,6 @@ import { GetPostsQueryDto } from './dtos/get-post-query.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { fileValidatorPipe } from 'src/gemini/file-validator.pipe';
 import { CreatePostIntroduceProductByAIDto } from './dtos/create-post-introduce-product-by-ai.dto';
-import { ToggleVerifyPostDto } from './dtos/toggle-verify-post.dto';
 
 @ApiTags('Posts')
 @ApiBearerAuth()
@@ -177,25 +176,6 @@ export class PostController {
     return res.status(HttpStatus.OK).json({
       message: 'Delete post successfully',
       metadata: await this.postService.deletePost(postId, userId, role),
-    });
-  }
-
-  @Post(':id/toggle-status-post')
-  @UseGuards(JwtAuthGuard, RoleGuard)
-  @Role('admin')
-  @ApiBody({
-    description: `Toggle post's status`,
-    type: ToggleVerifyPostDto,
-  })
-  async toggleStatusPost(
-    @Param('id') postId: string,
-    @Body() dto: ToggleVerifyPostDto,
-    @Res() res: Response,
-  ) {
-    const data = await this.postService.toggleStatusPost(postId, dto);
-    return res.status(HttpStatus.OK).json({
-      message: data.message,
-      metadata: data.post,
     });
   }
 }

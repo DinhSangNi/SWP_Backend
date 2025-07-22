@@ -21,7 +21,7 @@ import { CreatePostIntroduceProductByAIDto } from './dtos/create-post-introduce-
 import { GeminiService } from 'src/gemini/gemini.service';
 import { BusinessService } from 'src/business/business.service';
 import { CreatePostIntroduceBusinessByAIDto } from './dtos/create-post-introduce-business-by-AI.dto';
-import { ToggleVerifyPostDto } from './dtos/toggle-verify-post.dto';
+import { UpdatePostStatusDto } from './dtos/update-post-status';
 
 @Injectable()
 export class PostService {
@@ -39,7 +39,7 @@ export class PostService {
       keyword,
       status,
       category,
-      sortBy = 'createdAt',
+      sortBy = PostSortBy.CREATED_AT,
       sortOrder = 'desc',
       page = '1',
       limit = '10',
@@ -277,7 +277,7 @@ export class PostService {
     await this.postModel.deleteOne({ _id: post._id });
   }
 
-  async toggleStatusPost(postId: string, dto: ToggleVerifyPostDto) {
+  async toggleStatusPost(postId: string, dto: UpdatePostStatusDto) {
     const post = await this.postModel.findById(postId);
 
     if (!post) throw new NotFoundException('Post not found');

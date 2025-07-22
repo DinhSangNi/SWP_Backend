@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PostStatus } from '../types/post.enum';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 
-export class ToggleVerifyPostDto {
+export class UpdatePostStatusDto {
   @ApiProperty({
     enum: PostStatus,
   })

@@ -7,6 +7,7 @@ import {
   BusinessProfileSchema,
 } from './schemas/business-profile.schema';
 import { MediasModule } from 'src/medias/medias.module';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { MediasModule } from 'src/medias/medias.module';
       { name: BusinessProfile.name, schema: BusinessProfileSchema },
     ]),
     MediasModule,
+    UsersModule,
   ],
   controllers: [BusinessController],
   providers: [BusinessService],

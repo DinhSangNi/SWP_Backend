@@ -18,10 +18,7 @@ import { PaginationResponse } from 'src/common/dtos/pagination-response.dto';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectModel(User.name) private userModel: Model<User>,
-    private readonly businessService: BusinessService,
-  ) {}
+  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async createUser(dto: CreateUserDto): Promise<UserDocument> {
     const { email, password, username, fullname } = dto;
@@ -51,48 +48,11 @@ export class UsersService {
     return this.userModel.findOne({ _id: id });
   }
 
-  async becomeBusiness(
-    userId: string,
-    dto: CreateBusinessProfileDto,
-  ): Promise<UserDocument> {
+  async updateUserRole(userId: string, role: UserRole): Promise<UserDocument> {
     const user = await this.userModel.findById(userId);
-
     if (!user) throw new NotFoundException('User not found');
-    if (user.role === UserRole.BUSINESS)
-      throw new BadRequestException('User is already a business');
 
-    if (user.role !== UserRole.CUSTOMER)
-      throw new BadRequestException('Only customers can become business');
-
-    const businessProfile = await this.businessService.createBusinessProfile(
-      userId,
-      dto,
-    );
-
-    // user.role = UserRole.BUSINESS;
-    user.businessProfile = businessProfile._id as Types.ObjectId;
-    await user.save();
-
-    return user;
-  }
-
-  async verifyUserToBusiness(userId: string) {
-    const user = await this.userModel
-      .findOne({
-        _id: new Types.ObjectId(userId),
-      })
-      .populate('businessProfile');
-
-    if (!user) throw new NotFoundException('User not found');
-    if (!user.businessProfile)
-      throw new BadRequestException("User don't have business profile");
-
-    await this.businessService.verifyBusinessProfile(
-      user.businessProfile.toString(),
-    );
-
-    user.role = UserRole.BUSINESS;
-
+    user.role = role;
     return await user.save();
   }
 

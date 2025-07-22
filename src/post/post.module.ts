@@ -16,5 +16,6 @@ import { BusinessModule } from 'src/business/business.module';
   ],
   controllers: [PostController],
   providers: [PostService],
+  exports: [PostService],
 })
 export class PostModule {}

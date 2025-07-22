@@ -11,6 +11,9 @@ import { ProductsModule } from './products/products.module';
 import { CategoryModule } from './category/category.module';
 import { PostModule } from './post/post.module';
 import { GeminiModule } from './gemini/gemini.module';
+import { OrderModule } from './order/order.module';
+import { BusinessProfileLogModule } from './business-profile-log/business-profile-log.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -33,6 +36,9 @@ import { GeminiModule } from './gemini/gemini.module';
     CategoryModule,
     PostModule,
     GeminiModule,
+    OrderModule,
+    BusinessProfileLogModule,
+    AdminModule,
   ],
   providers: [AppService],
 })

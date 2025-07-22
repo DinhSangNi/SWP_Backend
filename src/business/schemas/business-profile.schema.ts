@@ -1,6 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { BusinessProfileStatus } from '../types/business-profile.enum';
+import {
+  BusinessProfileReviewStatus,
+  BusinessProfileStatus,
+} from '../types/business-profile.enum';
 
 export type BusinessProfileDocument = Document & BusinessProfile;
 @Schema({ timestamps: true })
@@ -29,14 +32,17 @@ export class BusinessProfile extends Document {
   @Prop({ default: null })
   taxCode?: string;
 
-  @Prop({ default: null })
-  verifiedAt: Date;
-
   @Prop({
     enum: BusinessProfileStatus,
     default: BusinessProfileStatus.INACTIVE,
   })
   status: BusinessProfileStatus;
+
+  @Prop({
+    enum: BusinessProfileReviewStatus,
+    default: BusinessProfileReviewStatus.Pending,
+  })
+  reviewStatus: BusinessProfileReviewStatus;
 }
 
 export const BusinessProfileSchema =

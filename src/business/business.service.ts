@@ -13,7 +13,12 @@ import { Model, Types } from 'mongoose';
 import { CreateBusinessProfileDto } from './dtos/create-business-profile.dto';
 import { MediasService } from 'src/medias/medias.service';
 import { MediaTarget } from 'src/medias/types/media.enum';
-import { BusinessProfileStatus } from './types/business-profile.enum';
+import {
+  BusinessProfileReviewStatus,
+  BusinessProfileStatus,
+} from './types/business-profile.enum';
+import { UsersService } from 'src/users/users.service';
+import { UserRole } from 'src/common/enums/user-role.enum';
 
 @Injectable()
 export class BusinessService {
@@ -21,6 +26,7 @@ export class BusinessService {
     @InjectModel(BusinessProfile.name)
     private readonly businessProfileModel: Model<BusinessProfileDocument>,
     private readonly mediaService: MediasService,
+    private readonly userService: UsersService,
   ) {}
 
   async createBusinessProfile(userId: string, dto: CreateBusinessProfileDto) {
@@ -57,6 +63,28 @@ export class BusinessService {
     return business;
   }
 
+  async becomeToBusiness(
+    userId: string,
+    dto: CreateBusinessProfileDto,
+  ): Promise<BusinessProfileDocument> {
+    const user = await this.userService.findById(userId);
+
+    if (!user) throw new NotFoundException('User not found');
+
+    if (user.role === UserRole.BUSINESS)
+      throw new BadRequestException('User is already a business');
+
+    if (user.role !== UserRole.CUSTOMER)
+      throw new BadRequestException('Only customers can become business');
+
+    const businessProfile = await this.createBusinessProfile(userId, dto);
+
+    user.businessProfile = businessProfile._id as Types.ObjectId;
+    await user.save();
+
+    return businessProfile;
+  }
+
   async getBussinessProfileByOwnerId(
     ownerId: string,
   ): Promise<BusinessProfileDocument> {
@@ -70,7 +98,10 @@ export class BusinessService {
     return businessProfile;
   }
 
-  async verifyBusinessProfile(id: string): Promise<BusinessProfileDocument> {
+  async updateBusinessProfileReviewStatus(
+    id: string,
+    reviewStatus: BusinessProfileReviewStatus,
+  ): Promise<BusinessProfileDocument> {
     const businessProfile = await this.businessProfileModel.findOne({
       _id: new Types.ObjectId(id),
     });
@@ -79,12 +110,15 @@ export class BusinessService {
       throw new NotFoundException('Business profile not found');
     }
 
-    if (businessProfile.verifiedAt) {
-      throw new BadRequestException('Business profile already verified');
+    if (reviewStatus === BusinessProfileReviewStatus.Approved) {
+      businessProfile.status = BusinessProfileStatus.ACTIVE;
+      this.userService.updateUserRole(
+        businessProfile.owner.toString(),
+        UserRole.BUSINESS,
+      );
     }
 
-    businessProfile.verifiedAt = new Date();
-    businessProfile.status = BusinessProfileStatus.ACTIVE;
+    businessProfile.reviewStatus = reviewStatus;
     return await businessProfile.save();
   }
 }

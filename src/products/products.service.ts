@@ -62,7 +62,7 @@ export class ProductsService {
         .sort(sort)
         .skip((page - 1) * limit)
         .limit(limit)
-        .populate('thumbnail images'),
+        .populate('thumbnail images owner'),
       this.productModel.countDocuments(filter),
     ]);
 
